@@ -1,0 +1,22 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Quiz Home</title>
+</head>
+<body>
+<h1>퀴즈 메인</h1>
+
+<p>
+    <a href="/user/login">로그인</a> |
+    <a href="/user/signup">회원가입</a> |
+    <a href="/quiz">퀴즈 목록</a> |
+    <a href="/quiz/play">퀴즈 풀기</a>
+</p>
+
+<div th:if="${session.loginEmail}">
+    <p>로그인: <b th:text="${session.loginEmail}"></b></p>
+    <a href="/user/logout">로그아웃</a>
+</div>
+</body>
+</html>
