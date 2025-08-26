@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>회원 등록</title></head>
+<body>
+<h2>회원 등록</h2>
+
+<form th:action="@{/member/insert}" th:object="${dto}" method="post">
+  <div>
+    <label>이름</label><br>
+    <input th:field="*{name}" type="text" placeholder="이름">
+    <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red"></p>
+  </div>
+
+  <div>
+    <label>나이</label><br>
+    <input th:field="*{age}" type="number" min="1" max="100" placeholder="나이">
+    <p th:if="${#fields.hasErrors('age')}" th:errors="*{age}" style="color:red"></p>
+  </div>
+
+  <div>
+    <label>주소</label><br>
+    <input th:field="*{address}" type="text" placeholder="주소">
+    <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" style="color:red"></p>
+  </div>
+
+  <div style="margin-top:8px">
+    <button type="submit">등록</button>
+    <a th:href="@{/list}">목록으로</a>
+  </div>
+</form>
+</body>
+</html>

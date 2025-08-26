@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>OX Quiz Application</title></head>
+<body>
+<h1>OX Quiz Application</h1>
+<h3>변경 폼</h3>
+
+<form th:action="@{/quiz/update}" th:object="${quiz}" method="post">
+  <input type="hidden" th:field="*{id}">
+  <div>
+    <label>퀴즈 내용:</label><br>
+    <textarea th:field="*{content}" rows="4" cols="60"></textarea>
+    <p th:if="${#fields.hasErrors('content')}" th:errors="*{content}" style="color:red"></p>
+  </div>
+
+  <div>
+    <label>퀴즈 정답:</label><br>
+    <label><input type="radio" th:field="*{answer}" value="O"> O</label>
+    <label><input type="radio" th:field="*{answer}" value="X"> X</label>
+    <p th:if="${#fields.hasErrors('answer')}" th:errors="*{answer}" style="color:red"></p>
+  </div>
+
+  <div>
+    <label>작성자:</label><br>
+    <input type="text" th:value="${quiz.writer}" readonly>
+  </div>
+
+  <button type="submit">저장</button>
+</form>
+
+<p><a th:href="@{/quiz}">CRUD 화면으로 돌아가기</a></p>
+</body>
+</html>

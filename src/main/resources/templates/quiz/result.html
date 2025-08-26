@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>퀴즈 결과</title>
+    <style>
+        body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:32px}
+        .card{border:1px solid #ddd;border-radius:12px;padding:20px;max-width:520px}
+        .n{font-size:28px;font-weight:700}
+        .muted{color:#777}
+        .row{margin:8px 0}
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-width:140px;
+             height:40px;padding:0 16px;border-radius:8px;border:1px solid #ddd;
+             background:#111;color:#fff;text-decoration:none}
+        .btn--ghost{background:#fff;color:#111}
+        a{color:#5145ff;text-decoration:none} a:hover{text-decoration:underline}
+    </style>
+</head>
+<body>
+<h1>내 퀴즈 결과</h1>
+<p class="muted" th:text="'사용자: ' + ${email}"></p>
+<p class="muted" th:text="'이번 라운드 진행: ' + ${played} + ' / ' + ${max}"></p>
+
+<!-- ✅ 이번 라운드 기준 -->
+<div class="card">
+    <div class="row">맞춘 개수(이번 라운드): <span class="n" th:text="${rCorrect}">0</span></div>
+    <div class="row">틀린 개수(이번 라운드): <span class="n" th:text="${rWrong}">0</span></div>
+    <hr>
+    <div class="row">총 푼 문제(이번 라운드): <span class="n" th:text="${rTotal}">0</span></div>
+</div>
+
+<!-- (선택) 누적 정보: 필요 없으면 이 블록 삭제해도 됨 -->
+<p class="muted" style="margin-top:10px">
+    누적 통계 — 맞춤:[[${all.correct}]], 틀림:[[${all.wrong}]], 총합:[[${all.total}]]
+</p>
+
+<p style="margin-top:16px">
+    <a th:href="@{/quiz/reset}" class="btn">다시 20문제 시작</a>
+    <a th:href="@{/quiz}" class="btn btn--ghost" style="margin-left:8px">목록으로</a>
+    <a th:href="@{/}" class="btn btn--ghost" style="margin-left:8px">홈으로</a>
+</p>
+</body>
+</html>

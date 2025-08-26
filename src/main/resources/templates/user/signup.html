@@ -1,0 +1,45 @@
+<!-- src/main/resources/templates/user/signup.html (교체 버전) -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>회원가입</title></head>
+<body>
+<h2>회원가입</h2>
+<form id="f" th:action="@{/user/signup}" th:object="${user}" method="post">
+  <div>
+    <label>이메일</label><br>
+    <input th:field="*{email}" type="email" required>
+  </div>
+  <div>
+    <label>비밀번호</label><br>
+    <input id="pw" th:field="*{password}" type="password" required minlength="3">
+  </div>
+  <div>
+    <label>비밀번호 확인</label><br>
+    <input id="pw2" type="password" required minlength="3">
+    <span id="msg" style="color:red;display:none">비밀번호가 일치하지 않습니다.</span>
+  </div>
+  <div>
+    <label>닉네임</label><br>
+    <input th:field="*{nickname}" type="text">
+  </div>
+  <button type="submit">가입</button>
+</form>
+<p>※ 관리자 등록: email <b>root</b>, password <b>admin</b> (최초 1회만)</p>
+<p><a th:href="@{/}">홈으로</a></p>
+
+<script>
+  const f = document.getElementById('f');
+  const pw = document.getElementById('pw');
+  const pw2 = document.getElementById('pw2');
+  const msg = document.getElementById('msg');
+  function validate(){
+    const ok = pw.value === pw2.value;
+    msg.style.display = ok ? 'none' : 'inline';
+    return ok;
+  }
+  pw.addEventListener('input', validate);
+  pw2.addEventListener('input', validate);
+  f.addEventListener('submit', (e)=>{ if(!validate()) e.preventDefault(); });
+</script>
+</body>
+</html>

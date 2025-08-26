@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>사용자 목록</title></head>
+<body>
+<h2>사용자 목록</h2>
+<p><a th:href="@{/}">홈</a></p>
+
+<table border="1" cellpadding="6">
+  <tr>
+    <th>Email</th>
+    <th>닉네임</th>
+    <th>수정</th>
+    <th>삭제</th>
+  </tr>
+  <tr th:each="u : ${list}">
+    <td th:text="${u.email}"></td>
+    <td th:text="${u.nickname}"></td>
+    <td>
+      <form th:action="@{/user/update}" method="post" style="display:inline">
+        <input type="hidden" name="email" th:value="${u.email}">
+        <button type="submit">수정</button>
+      </form>
+    </td>
+    <td>
+      <form th:action="@{/user/delete}" method="post" style="display:inline"
+            onsubmit="return confirm('삭제하시겠습니까?');">
+        <input type="hidden" name="email" th:value="${u.email}">
+        <button type="submit">삭제</button>
+      </form>
+    </td>
+  </tr>
+  <tr th:if="${#lists.isEmpty(list)}">
+    <td colspan="4">등록된 사용자가 없습니다.</td>
+  </tr>
+</table>
+</body>
+</html>

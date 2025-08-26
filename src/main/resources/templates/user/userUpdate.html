@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>사용자 수정</title></head>
+<body>
+<h2>사용자 수정</h2>
+
+<form th:action="@{/user/updateUser}" th:object="${user}" method="post">
+  <div>
+    <label>Email</label><br>
+    <!-- 기본키(이메일) 수정하지 않도록 readonly -->
+    <input th:field="*{email}" type="email" readonly>
+  </div>
+
+  <div>
+    <label>비밀번호</label><br>
+    <input th:field="*{password}" type="text" placeholder="비밀번호">
+  </div>
+
+  <div>
+    <label>닉네임</label><br>
+    <input th:field="*{nickname}" type="text" placeholder="닉네임">
+  </div>
+
+  <div style="margin-top:8px">
+    <button type="submit">저장</button>
+    <a th:href="@{/user/list}">목록으로</a>
+  </div>
+</form>
+</body>
+</html>

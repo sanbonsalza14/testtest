@@ -81,4 +81,14 @@ public class QuizService {
     public boolean isOwner(QuizDto dto, String email){
         return dto != null && dto.getWriter() != null && dto.getWriter().equals(email);
     }
+    /** ✅ 유저별 정답/오답 집계 */
+    public UserStats getUserStats(String email) {
+        long correct = playResultRepository.countCorrectByUser(email);
+        long wrong   = playResultRepository.countWrongByUser(email);
+        return new UserStats(correct, wrong, correct + wrong);
+    }
+
+    /** 간단한 통계 DTO (레코드) */
+    public record UserStats(long correct, long wrong, long total) {}
+
 }

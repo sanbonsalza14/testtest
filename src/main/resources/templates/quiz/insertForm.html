@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>OX Quiz Application</title>
+  <!-- 필요하면 공통 CSS 링크
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  -->
+  <style>
+    body{font-family:system-ui,Apple SD Gothic Neo,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:32px;line-height:1.5}
+    h1{margin:0 0 16px} h3{margin:24px 0 12px}
+    textarea,input[type=text]{width:520px;padding:10px;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}
+    textarea{min-height:120px}
+    .error{color:#d7263d;margin:6px 0 0 0}
+    button{padding:9px 16px;border:0;border-radius:8px;background:#111;color:#fff;cursor:pointer}
+    a{color:#5145ff;text-decoration:none} a:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+<h1>OX Quiz Application</h1>
+<h3>등록 폼</h3>
+
+<form th:action="@{/quiz/insert}" th:object="${quiz}" method="post">
+  <!-- 내용 -->
+  <div>
+    <label>퀴즈 내용:</label><br>
+    <textarea th:field="*{content}"></textarea>
+    <p th:if="${#fields.hasErrors('content')}" th:errors="*{content}" class="error"></p>
+  </div>
+
+  <!-- 정답 -->
+  <div style="margin-top:12px">
+    <label>퀴즈 정답:</label><br>
+    <label><input type="radio" th:field="*{answer}" value="O"> O</label>
+    <label style="margin-left:10px"><input type="radio" th:field="*{answer}" value="X"> X</label>
+    <p th:if="${#fields.hasErrors('answer')}" th:errors="*{answer}" class="error"></p>
+  </div>
+
+  <!-- 작성자 (세션 이메일을 컨트롤러에서 넣어주고, 화면은 읽기전용으로 표시) -->
+  <div style="margin-top:12px">
+    <label>작성자:</label><br>
+    <input type="text" th:field="*{writer}" readonly>
+  </div>
+
+  <div style="margin-top:16px">
+    <button type="submit">송신</button>
+    <a th:href="@{/quiz}" style="margin-left:8px">목록으로</a>
+  </div>
+</form>
+</body>
+</html>

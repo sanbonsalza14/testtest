@@ -1,22 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <title>Quiz Home</title>
+    <meta charset="UTF-8"><title>OX Quiz Application</title>
+    <style>
+        body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:32px}
+        .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);
+               background:#111;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15)}
+    </style>
 </head>
 <body>
-<h1>퀴즈 메인</h1>
 
-<p>
-    <a href="/user/login">로그인</a> |
-    <a href="/user/signup">회원가입</a> |
-    <a href="/quiz">퀴즈 목록</a> |
-    <a href="/quiz/play">퀴즈 풀기</a>
-</p>
+<!-- ✅ 승인/비번변경 후 메시지 -->
+<div th:if="${toast}" class="toast" id="toast">[[${toast}]]</div>
+<script>
+    const t=document.getElementById('toast');
+    if(t){ setTimeout(()=> t.style.display='none', 2200); }
+</script>
 
-<div th:if="${session.loginEmail}">
-    <p>로그인: <b th:text="${session.loginEmail}"></b></p>
-    <a href="/user/logout">로그아웃</a>
-</div>
+<h1>OX Quiz Application</h1>
+<ul>
+    <li><a th:href="@{/quiz}">등록된 퀴즈 목록/CRUD</a></li>
+    <li><a th:href="@{/quiz/play}">퀴즈 플레이</a></li>
+    <li><a th:href="@{/user/login}">로그인</a> / <a th:href="@{/user/signup}">회원가입</a></li>
+    <li><a th:href="@{/admin/pending}">관리자 승인/비번 관리</a></li>
+</ul>
 </body>
 </html>

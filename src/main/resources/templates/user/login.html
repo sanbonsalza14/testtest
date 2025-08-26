@@ -1,0 +1,21 @@
+<!-- src/main/resources/templates/user/login.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>로그인</title></head>
+<body>
+<h2>로그인</h2>
+<form th:action="@{/user/login}" method="post">
+    <div>
+        <label>이메일</label><br>
+        <input type="text" name="email" required>
+    </div>
+    <div>
+        <label>비밀번호</label><br>
+        <input type="password" name="password" required>
+    </div>
+    <p th:if="${msg}" th:text="${msg}" style="color:red"></p>
+    <button type="submit">로그인</button>
+</form>
+<p><a th:href="@{/user/signup}">회원가입</a> / <a th:href="@{/}">홈으로</a></p>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>OX 퀴즈 게임 : PLAY</title>
+  <style>
+    body {
+      font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      margin: 32px;
+    }
+    h1 {
+      margin-bottom: 8px;
+    }
+    .progress {
+      color: #666;
+      margin-bottom: 16px;
+    }
+    .actions {
+      margin-top: 1.5cm; /* 버튼 높이 동일 유지 */
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 120px;
+      height: 40px;
+      padding: 0 16px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background: #fff;
+      color: #111;
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .btn--primary {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+    .btn + .btn {
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+<h1>OX 퀴즈 게임 : PLAY</h1>
+
+<div th:if="${quiz == null}">
+  <p style="color: #d7263d">등록된 문제가 없습니다.</p>
+  <div class="actions">
+    <a th:href="@{/quiz}" class="btn">목록으로</a>
+  </div>
+</div>
+
+<div th:unless="${quiz == null}">
+  <div class="progress" th:text="'문제 ' + ${progress} + ' / ' + ${max}"></div>
+  <h3>퀴즈</h3>
+  <p th:text="${quiz.content}"></p>
+
+  <form th:action="@{/quiz/check}" method="post">
+    <input type="hidden" name="id" th:value="${quiz.id}">
+    <label><input type="radio" name="answer" value="O" required> O</label>
+    <label style="margin-left: 10px"><input type="radio" name="answer" value="X" required> X</label>
+
+    <div class="actions">
+      <button type="submit" class="btn btn--primary">정답 제출</button>
+      <a th:href="@{/quiz/result}" class="btn">결과 보기</a>
+      <a th:href="@{/quiz}" class="btn">목록으로</a>
+    </div>
+  </form>
+</div>
+</body>
+</html>
