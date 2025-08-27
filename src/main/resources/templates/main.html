@@ -7,10 +7,11 @@
         .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);
                background:#111;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15)}
     </style>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
 </head>
 <body>
 
-<!-- ✅ 승인/비번변경 후 메시지 -->
 <div th:if="${toast}" class="toast" id="toast">[[${toast}]]</div>
 <script>
     const t=document.getElementById('toast');
@@ -21,8 +22,9 @@
 <ul>
     <li><a th:href="@{/quiz}">등록된 퀴즈 목록/CRUD</a></li>
     <li><a th:href="@{/quiz/play}">퀴즈 플레이</a></li>
+    <li><a th:href="@{/rank}">랭킹 보기</a></li>
     <li><a th:href="@{/user/login}">로그인</a> / <a th:href="@{/user/signup}">회원가입</a></li>
-    <li><a th:href="@{/admin/pending}">관리자 승인/비번 관리</a></li>
+    <li><a th:href="@{/admin/users}">관리자: 회원 관리</a></li>
 </ul>
 </body>
 </html>

@@ -9,8 +9,12 @@ import lombok.Data;
 public class UserEntity extends BaseTimeEntity {
     @Id
     private String email;
+
     @Column(nullable = false)
     private String password;
+
+    /** ✅ 닉네임을 고유값으로 관리 */
+    @Column(nullable = false, unique = true, length = 50)
     private String nickname;
 
     @Enumerated(EnumType.STRING)

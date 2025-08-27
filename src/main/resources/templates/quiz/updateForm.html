@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>OX Quiz Application</title></head>
+<head><meta charset="UTF-8"><title>OX Quiz Application</title>
+  <style>.ox-o{color:blue;font-weight:700}.ox-x{color:red;font-weight:700}</style>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+
+</head>
 <body>
 <h1>OX Quiz Application</h1>
 <h3>변경 폼</h3>
@@ -15,13 +19,13 @@
 
   <div>
     <label>퀴즈 정답:</label><br>
-    <label><input type="radio" th:field="*{answer}" value="O"> O</label>
-    <label><input type="radio" th:field="*{answer}" value="X"> X</label>
+    <label class="ox-o"><input type="radio" th:field="*{answer}" value="O"> O</label>
+    <label class="ox-x"><input type="radio" th:field="*{answer}" value="X"> X</label>
     <p th:if="${#fields.hasErrors('answer')}" th:errors="*{answer}" style="color:red"></p>
   </div>
 
   <div>
-    <label>작성자:</label><br>
+    <label>작성자(닉네임):</label><br>
     <input type="text" th:value="${quiz.writer}" readonly>
   </div>
 

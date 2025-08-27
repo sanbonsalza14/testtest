@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><title>닉네임 관리</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:32px}
+    table{border-collapse:collapse} th,td{border:1px solid #ddd;padding:8px 12px}
+    th{background:#f7f7f7}
+    .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);
+      background:#111;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15)}
+  </style>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+
+</head>
+<body>
+<h2>닉네임 관리</h2>
+
+<div th:if="${toast}" class="toast" id="toast">[[${toast}]]</div>
+<script>
+  const t=document.getElementById('toast'); if(t){ setTimeout(()=> t.style.display='none', 2200); }
+</script>
+
+<table>
+  <tr><th>Email</th><th>현재 닉네임</th><th>변경</th></tr>
+  <tr th:each="u: ${list}">
+    <td th:text="${u.email}"></td>
+    <td th:text="${u.nickname}"></td>
+    <td>
+      <form th:action="@{/admin/nickname/update}" method="post" autocomplete="off">
+        <input type="hidden" name="email" th:value="${u.email}">
+        <input type="text" name="nickname" placeholder="새 닉네임" required minlength="1" maxlength="50">
+        <button type="submit">변경</button>
+      </form>
+    </td>
+  </tr>
+</table>
+
+<p style="margin-top:12px"><a th:href="@{/}">홈으로</a></p>
+</body>
+</html>

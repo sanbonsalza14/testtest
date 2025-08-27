@@ -12,17 +12,17 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class QuizService {
     private final QuizRepository quizRepository;
     private final PlayResultRepository playResultRepository;
-    private final UserRepository userRepository;// *주입
+    private final UserRepository userRepository;
 
     public List<QuizDto> findAll() {
-        return quizRepository.findAll()
-                .stream().map(QuizDto::fromEntity).toList();
+        return quizRepository.findAll().stream().map(QuizDto::fromEntity).toList();
     }
 
     public QuizDto findOne(Long id) {
@@ -46,6 +46,19 @@ public class QuizService {
         quizRepository.deleteById(id);
     }
 
+    /** ✅ 라운드 시작 시: 전체 개수와 20 중 작은 값으로 랜덤 ID 묶음을 뽑는다 */
+    public List<Long> sampleRoundIds(int maxRoundSize){
+        long total = quizRepository.count();
+        int limit = (int) Math.min(total, maxRoundSize);
+        return quizRepository.pickRandomIds(limit);
+    }
+
+    /** ✅ ID로 퀴즈 한 개를 DTO로 */
+    public Optional<QuizDto> findDtoById(Long id){
+        return quizRepository.findById(id).map(QuizDto::fromEntity);
+    }
+
+    /** (기존) 단일 랜덤 - 남겨둠 */
     public QuizDto pickRandom(){
         Quiz q = quizRepository.pickRandomOne();
         return q == null ? null : QuizDto.fromEntity(q);
@@ -54,6 +67,7 @@ public class QuizService {
     public boolean checkAnswer(Long quizId, String userAnswer, String userEmail){
         Quiz q = quizRepository.findById(quizId).orElse(null);
         boolean correct = (q != null) && q.getAnswer().equalsIgnoreCase(userAnswer);
+
         PlayResult pr = new PlayResult();
         pr.setQuizId(quizId);
         pr.setUserEmail(userEmail == null ? "guest" : userEmail);
@@ -72,15 +86,18 @@ public class QuizService {
         return correct;
     }
 
-    public boolean isOwner(Long quizId, String email){
-        if (email == null) return false;
+    // ...
+    public boolean isOwner(Long quizId, String nickname){
+        if (nickname == null) return false;
         Quiz q = quizRepository.findById(quizId).orElse(null);
-        return q != null && email.equals(q.getWriter());
+        return q != null && nickname.equals(q.getWriter());
     }
 
-    public boolean isOwner(QuizDto dto, String email){
-        return dto != null && dto.getWriter() != null && dto.getWriter().equals(email);
+    public boolean isOwner(QuizDto dto, String nickname){
+        return dto != null && dto.getWriter() != null && dto.getWriter().equals(nickname);
     }
+// ...
+
     /** ✅ 유저별 정답/오답 집계 */
     public UserStats getUserStats(String email) {
         long correct = playResultRepository.countCorrectByUser(email);
@@ -90,5 +107,4 @@ public class QuizService {
 
     /** 간단한 통계 DTO (레코드) */
     public record UserStats(long correct, long wrong, long total) {}
-
 }

@@ -1,7 +1,9 @@
 <!-- src/main/resources/templates/user/signup.html (교체 버전) -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>회원가입</title></head>
+<head><meta charset="UTF-8"><title>회원가입</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
 <body>
 <h2>회원가입</h2>
 <form id="f" th:action="@{/user/signup}" th:object="${user}" method="post">
@@ -26,6 +28,7 @@
 </form>
 <p>※ 관리자 등록: email <b>root</b>, password <b>admin</b> (최초 1회만)</p>
 <p><a th:href="@{/}">홈으로</a></p>
+<p th:if="${msg}" th:text="${msg}" style="color:red"></p>
 
 <script>
   const f = document.getElementById('f');

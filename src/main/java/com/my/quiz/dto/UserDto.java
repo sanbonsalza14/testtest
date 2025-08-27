@@ -21,11 +21,17 @@ public class UserDto {
         );
     }
 
-    public static UserEntity toDto(UserDto dto) {
+    // ✅ DTO -> Entity (명확한 이름)
+    public static UserEntity toEntity(UserDto dto) {
         UserEntity entity = new UserEntity();
         entity.setEmail(dto.getEmail());
         entity.setPassword(dto.getPassword());
         entity.setNickname(dto.getNickname());
         return entity;
+    }
+
+    // (호환 유지) 기존 이름도 남겨두되 내부 위임
+    public static UserEntity toDto(UserDto dto) {
+        return toEntity(dto);
     }
 }

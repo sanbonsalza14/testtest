@@ -4,59 +4,42 @@
   <meta charset="UTF-8">
   <title>OX 퀴즈 게임 : 정답</title>
   <style>
-    body {
-      font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      margin: 32px;
-    }
-    h1 {
-      margin-bottom: 8px;
-    }
-    .progress {
-      color: #666;
-      margin-bottom: 16px;
-    }
-    .actions {
-      margin-top: 1.5cm; /* 버튼 높이 동일 유지 */
-      display: flex;
-      gap: 8px;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 120px;
-      height: 40px;
-      padding: 0 16px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      background: #fff;
-      color: #111;
-      text-decoration: none;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .btn--primary {
-      background: #111;
-      color: #fff;
-      border-color: #111;
-    }
-    .btn + .btn {
-      margin-left: 8px;
-    }
+    body { font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 32px; }
+    h1 { margin-bottom: 8px; }
+    .progress { color: #666; margin-bottom: 16px; }
+    .actions { margin-top: 1.5cm; display: flex; gap: 8px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-width: 120px; height: 40px; padding: 0 16px; border-radius: 8px; border: 1px solid #ddd; background: #fff; color: #111; text-decoration: none; font-size: 14px; cursor: pointer; }
+    .btn--primary { background: #111; color: #fff; border-color: #111; }
+    .msg-correct { color: blue; font-weight: 700; }
+    .msg-wrong   { color: red;  font-weight: 700; }
   </style>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+
 </head>
 <body>
 <h1>OX 퀴즈 게임 : 정답</h1>
 
-<p th:if="${correct}" style="color:#d7263d">정답입니다.</p>
-<p th:unless="${correct}" style="color:#1e66f5">오답입니다.</p>
+<p th:if="${correct}" class="msg-correct">정답입니다.</p>
+<p th:unless="${correct}" class="msg-wrong">오답입니다.</p>
 
 <p class="progress" th:text="'진행: ' + ${progress} + ' / ' + ${max}"></p>
 
 <div class="actions">
   <a th:href="@{/quiz/play}" class="btn btn--primary">다음 문제</a>
   <a th:href="@{/quiz/result}" class="btn">결과 보기</a>
-  <a th:href="@{/quiz}" class="btn">CRUD 화면</a>
+  <a th:href="@{/quiz}" class="btn">목록으로</a>
 </div>
+
+<script th:inline="javascript">
+  const progress = /*[[${progress}]]*/ 0;
+  const max = /*[[${max}]]*/ 20;
+  setTimeout(() => {
+    if (progress >= max) {
+      window.location.href = /*[[@{/quiz/result}]]*/ '/quiz/result';
+    } else {
+      window.location.href = /*[[@{/quiz/play}]]*/ '/quiz/play';
+    }
+  }, 1500);
+</script>
 </body>
 </html>

@@ -28,10 +28,7 @@ public class UserController {
             model.addAttribute("msg", "존재하지 않는 계정입니다.");
             return "/user/login";
         }
-
-        // ✅ 수정: 실제 엔티티를 조회해 승인/권한을 확인
         UserEntity entity = userService.findEntity(dto.getEmail());
-
         if (!dto.getPassword().equals(loginResult.getPassword())) {
             model.addAttribute("msg", "비밀번호가 일치하지 않습니다.");
             return "/user/login";
@@ -42,6 +39,7 @@ public class UserController {
         }
 
         session.setAttribute("loginEmail", dto.getEmail());
+        session.setAttribute("loginNickname", entity.getNickname()); // ✅ 닉네임
         session.setAttribute("role", entity.getRole().name());
         session.setMaxInactiveInterval(60 * 30);
         return "redirect:/";
@@ -54,8 +52,14 @@ public class UserController {
     }
 
     @PostMapping("signup")
-    public String signup(@ModelAttribute("user") UserDto dto) {
-        userService.saveUser(dto);
+    public String signup(@ModelAttribute("user") UserDto dto, Model model) {
+        try {
+            userService.saveUser(dto);
+        } catch (Exception e) {
+            model.addAttribute("user", dto);
+            model.addAttribute("msg", e.getMessage());
+            return "/user/signup";
+        }
         return "redirect:/";
     }
 
@@ -80,16 +84,24 @@ public class UserController {
     }
 
     @PostMapping("updateUser")
-    public String updateUser(@ModelAttribute("user") UserDto user) {
-        userService.saveUser(user);
+    public String updateUser(@ModelAttribute("user") UserDto user, Model model) {
+        try {
+            userService.updateUserPreserveMeta(user);
+        } catch (Exception e) {
+            model.addAttribute("user", user);
+            model.addAttribute("msg", e.getMessage());
+            return "/user/userUpdate";
+        }
         return "redirect:/user/list";
     }
 
+    // ... 기존 import/어노테이션/코드 동일
     @GetMapping("logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "main";
+        return "redirect:/";
     }
+
 
     @GetMapping("myInfo")
     public String myInfo(HttpSession session, Model model) {

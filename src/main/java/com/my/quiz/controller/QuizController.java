@@ -1,6 +1,7 @@
 package com.my.quiz.controller;
 
 import com.my.quiz.dto.QuizDto;
+import com.my.quiz.repository.UserRepository;
 import com.my.quiz.service.QuizService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -19,6 +21,7 @@ import java.util.List;
 public class QuizController {
 
     private final QuizService quizService;
+    private final UserRepository userRepository; // ✅ 랭킹용 주입
 
     /** 라운드당 문제 수 */
     private static final int MAX_ROUNDS = 20;
@@ -27,6 +30,14 @@ public class QuizController {
     private String emailOf(HttpSession s){
         Object a = s.getAttribute("loginEmail");
         return (a == null) ? null : a.toString();
+    }
+    private String nicknameOf(HttpSession s){
+        Object a = s.getAttribute("loginNickname");
+        return (a == null) ? null : a.toString();
+    }
+    private boolean isAdmin(HttpSession s){
+        Object r = s.getAttribute("role");
+        return r != null && "ADMIN".equals(r.toString());
     }
     private int getInt(HttpSession s, String key){
         Object v = s.getAttribute(key);
@@ -43,17 +54,26 @@ public class QuizController {
     private int roundWrong(HttpSession s){ return getInt(s, "roundWrong"); }
     private void roundWrong(HttpSession s, int n){ setInt(s, "roundWrong", n); }
 
+    @SuppressWarnings("unchecked")
+    private List<Long> roundIds(HttpSession s){
+        Object v = s.getAttribute("roundIds");
+        return (v instanceof List) ? (List<Long>) v : null;
+    }
+    private void setRoundIds(HttpSession s, List<Long> ids){ s.setAttribute("roundIds", ids); }
+
     private void incRoundBy(HttpSession s, boolean correct){
         if (correct) roundCorrect(s, roundCorrect(s) + 1);
         else roundWrong(s, roundWrong(s) + 1);
     }
 
-    // ===== CRUD 목록 =====
+    // ===== 목록 =====
     @GetMapping
     public String list(Model model, HttpSession session){
         List<QuizDto> list = quizService.findAll();
         model.addAttribute("list", list);
         model.addAttribute("loginEmail", session.getAttribute("loginEmail"));
+        model.addAttribute("loginNickname", session.getAttribute("loginNickname"));
+        model.addAttribute("role", session.getAttribute("role"));
         return "quiz/showQuiz";
     }
 
@@ -61,20 +81,21 @@ public class QuizController {
     @GetMapping("/insertForm")
     public String insertForm(Model model, HttpSession session){
         QuizDto q = new QuizDto();
-        Object email = session.getAttribute("loginEmail");
-        if (email != null) q.setWriter(email.toString()); // 표시용
+        Object nick = session.getAttribute("loginNickname");
+        if (nick != null) q.setWriter(nick.toString());
         model.addAttribute("quiz", q);
         return "quiz/insertForm";
     }
 
+    // ===== 등록 =====
     @PostMapping("/insert")
     public String insert(@Valid @ModelAttribute("quiz") QuizDto dto,
                          BindingResult bindingResult,
                          HttpSession session){
         if (bindingResult.hasErrors()) return "quiz/insertForm";
-        String email = emailOf(session);
-        if (email == null) return "redirect:/user/login";
-        dto.setWriter(email);
+        String nickname = nicknameOf(session);
+        if (nickname == null) return "redirect:/user/login";
+        dto.setWriter(nickname);
         quizService.insert(dto);
         return "redirect:/quiz";
     }
@@ -84,8 +105,10 @@ public class QuizController {
     public String updateForm(@PathVariable Long id, Model model, HttpSession session){
         QuizDto dto = quizService.findOne(id);
         if (ObjectUtils.isEmpty(dto)) return "redirect:/quiz";
-        String email = emailOf(session);
-        if (email == null || !quizService.isOwner(dto, email)) return "redirect:/quiz";
+        String nickname = nicknameOf(session);
+        if (!(isAdmin(session) || (nickname != null && quizService.isOwner(dto, nickname)))) {
+            return "redirect:/quiz";
+        }
         model.addAttribute("quiz", dto);
         return "quiz/updateForm";
     }
@@ -95,16 +118,20 @@ public class QuizController {
                          BindingResult bindingResult,
                          HttpSession session){
         if (bindingResult.hasErrors()) return "quiz/updateForm";
-        String email = emailOf(session);
-        if (email == null || !quizService.isOwner(dto.getId(), email)) return "redirect:/quiz";
+        String nickname = nicknameOf(session);
+        if (!(isAdmin(session) || (nickname != null && quizService.isOwner(dto.getId(), nickname)))) {
+            return "redirect:/quiz";
+        }
         quizService.updatePreserveWriter(dto);
         return "redirect:/quiz";
     }
 
     @PostMapping("/delete")
     public String delete(@RequestParam Long id, HttpSession session){
-        String email = emailOf(session);
-        if (email == null || !quizService.isOwner(id, email)) return "redirect:/quiz";
+        String nickname = nicknameOf(session);
+        if (!(isAdmin(session) || (nickname != null && quizService.isOwner(id, nickname)))) {
+            return "redirect:/quiz";
+        }
         quizService.delete(id);
         return "redirect:/quiz";
     }
@@ -113,13 +140,27 @@ public class QuizController {
     @GetMapping("/play")
     public String play(Model model, HttpSession session){
         int played = played(session);
-        if (played >= MAX_ROUNDS) {
+
+        List<Long> ids = roundIds(session);
+        if (ids == null || ids.isEmpty()) {
+            ids = new ArrayList<>(quizService.sampleRoundIds(MAX_ROUNDS));
+            setRoundIds(session, ids);
+            played(session, 0);
+            roundCorrect(session, 0);
+            roundWrong(session, 0);
+            played = 0;
+        }
+
+        if (played >= ids.size()) {
             return "redirect:/quiz/result?finished=1";
         }
-        QuizDto q = quizService.pickRandom();
+
+        Long nextId = ids.get(played);
+        QuizDto q = quizService.findDtoById(nextId).orElse(null);
+
         model.addAttribute("quiz", q);
-        model.addAttribute("progress", played + 1); // 이번 문제 번호
-        model.addAttribute("max", MAX_ROUNDS);
+        model.addAttribute("progress", played + 1);
+        model.addAttribute("max", ids.size());
         return "quiz/play";
     }
 
@@ -132,44 +173,47 @@ public class QuizController {
         String email = emailOf(session);
         boolean correct = quizService.checkAnswer(id, answer, email);
 
-        // 라운드 집계 & 진행 카운트
         incRoundBy(session, correct);
         int nowPlayed = played(session) + 1;
         played(session, nowPlayed);
 
-        if (nowPlayed >= MAX_ROUNDS) {
-            // 20번째 문제를 풀면 즉시 결과로
-            return "redirect:/quiz/result?finished=1";
-        }
+        List<Long> ids = roundIds(session);
+        int max = (ids == null) ? MAX_ROUNDS : ids.size();
 
         model.addAttribute("correct", correct);
         model.addAttribute("progress", nowPlayed);
-        model.addAttribute("max", MAX_ROUNDS);
+        model.addAttribute("max", max);
         return "quiz/check";
     }
 
-    // ===== 결과 (이번 라운드 기준 표시, 누적은 참고로 별도 표시) =====
+    // ===== 결과 + 랭킹 같이 표시 =====
     @GetMapping("/result")
     public String result(HttpSession session, Model model){
-        String email = emailOf(session);
-        if (email == null) return "redirect:/user/login";
+        Object nick = session.getAttribute("loginNickname");
+        if (nick == null) return "redirect:/user/login";
 
         int rCorrect = roundCorrect(session);
         int rWrong   = roundWrong(session);
-        int rTotal   = rCorrect + rWrong;  // ← 이번 라운드 총합 (정확히 20이 되어야 함)
+        int rTotal   = rCorrect + rWrong;
 
-        // 누적(선택 노출용)
-        QuizService.UserStats all = quizService.getUserStats(email);
+        String email = emailOf(session);
+        var all = quizService.getUserStats(email);
+
+        List<Long> ids = roundIds(session);
+        int max = (ids == null) ? MAX_ROUNDS : ids.size();
 
         model.addAttribute("email", email);
         model.addAttribute("played", played(session));
-        model.addAttribute("max", MAX_ROUNDS);
-
+        model.addAttribute("max", max);
         model.addAttribute("rCorrect", rCorrect);
         model.addAttribute("rWrong", rWrong);
         model.addAttribute("rTotal", rTotal);
-
         model.addAttribute("all", all);
+
+        // ✅ 랭킹(승인된 사용자) 상위 10명
+        var full = userRepository.findByApprovedTrueOrderByAnswerTrueDescAnswerFalseAscNicknameAsc();
+        model.addAttribute("rankTop", (full.size() > 10) ? full.subList(0,10) : full);
+
         return "quiz/result";
     }
 
@@ -179,6 +223,7 @@ public class QuizController {
         played(session, 0);
         roundCorrect(session, 0);
         roundWrong(session, 0);
+        setRoundIds(session, new ArrayList<>());
         return "redirect:/quiz/play";
     }
 }

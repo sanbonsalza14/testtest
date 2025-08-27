@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"><title>랭킹</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <style>
+    table{border-collapse:collapse;width:100%;max-width:880px}
+    th,td{border:1px solid #e5e5e5;padding:10px 12px;text-align:center}
+    th{background:#fafafa}
+    .nick{text-align:left}
+    .medal{font-size:20px}
+  </style>
+</head>
+<body>
+<h1>OX 퀴즈 랭킹</h1>
+<p><a th:href="@{/}">홈</a> · <a th:href="@{/quiz}">퀴즈 목록</a></p>
+
+<table>
+  <tr>
+    <th>순위</th><th>닉네임</th><th>정답</th><th>오답</th><th>총 풀이</th><th>정확도</th>
+  </tr>
+  <tr th:each="u, stat : ${list}">
+    <td>
+      <span th:switch="${stat.count}">
+        <span th:case="1" class="medal">🥇</span>
+        <span th:case="2" class="medal">🥈</span>
+        <span th:case="3" class="medal">🥉</span>
+        <span th:case="*" th:text="${stat.count}">4</span>
+      </span>
+    </td>
+    <td class="nick" th:text="${u.nickname}">닉</td>
+    <td th:text="${u.answerTrue}">0</td>
+    <td th:text="${u.answerFalse}">0</td>
+    <td th:text="${u.answerTrue + u.answerFalse}">0</td>
+    <td th:text="${#numbers.formatDecimal((u.answerTrue==0 && u.answerFalse==0) ? 0.0 : (100.0 * u.answerTrue / (u.answerTrue + u.answerFalse)), 1, 1)} + '%'">0%</td>
+  </tr>
+  <tr th:if="${#lists.isEmpty(list)}">
+    <td colspan="6">아직 랭킹 데이터가 없습니다.</td>
+  </tr>
+</table>
+</body>
+</html>

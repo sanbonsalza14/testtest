@@ -2,16 +2,36 @@ package com.my.quiz;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.auditing.DateTimeProvider;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@EnableJpaAuditing   //DB 작업을 할 때, 매번 created_at, updated_at 같은 칼럼을 직접 코딩해서 채우는 건 귀찮고 실수하기 쉬워.
-//@EnableJpaAuditing을 켜면 JPA가 자동으로 이런 값을 관리해 줘서 코드가 깔끔해지고 실수를 줄일 수 있어.
-@SpringBootApplication
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
+import java.util.TimeZone;
 
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+@EnableJpaAuditing(dateTimeProviderRef = "auditingDateTimeProvider")
 public class QuizApplication {
 
 	public static void main(String[] args) {
+		// ✅ 서버/로컬 환경이 달라도 createdAt/updatedAt 포맷 흔들리지 않도록 고정
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
 		SpringApplication.run(QuizApplication.class, args);
 	}
 
+	/** ✅ 감사 타임스탬프 공급자 (테스트에서 Clock 주입으로 시간 고정 가능) */
+	@Bean
+	public DateTimeProvider auditingDateTimeProvider(Clock clock) {
+		return () -> Optional.of(LocalDateTime.now(clock));
+	}
+
+	/** ✅ 시스템 공용 시계: KST 기준 */
+	@Bean
+	public Clock systemClock() {
+		return Clock.system(ZoneId.of("Asia/Seoul"));
+	}
 }

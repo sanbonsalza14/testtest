@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><title>회원 관리</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <style>
+        table{border-collapse:collapse;width:100%;max-width:960px}
+        th,td{border:1px solid #e5e5e5;padding:8px 10px;text-align:center}
+        th{background:#fafafa}
+        .left{text-align:left}
+        .toast{position:fixed;left:50%;top:24px;transform:translateX(-50%);
+          background:#111;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15)}
+        form{display:inline-block;margin:2px}
+        input[type=text],input[type=password]{padding:6px 8px;border:1px solid #ddd;border-radius:6px}
+        button{padding:6px 10px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer}
+        .btn-primary{background:#111;color:#fff;border-color:#111}
+        .role-admin{color:#d7263d;font-weight:700}
+        .ok{color:#0070f3}
+        .no{color:#999}
+    </style>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
+</head>
+<body>
+<h2>회원 관리</h2>
+<p><a th:href="@{/}">홈</a> · <a th:href="@{/admin/pending}">승인 대기</a> · <a th:href="@{/rank}">랭킹</a></p>
+
+<div th:if="${toast}" class="toast" id="toast">[[${toast}]]</div>
+<script>const t=document.getElementById('toast'); if(t){ setTimeout(()=> t.style.display='none', 2200); }</script>
+
+<table>
+    <tr>
+        <th>이메일</th><th>닉네임</th><th>권한</th><th>승인</th><th>정답</th><th>오답</th><th>액션</th>
+    </tr>
+    <tr th:each="u: ${list}">
+        <td class="left" th:text="${u.email}">email</td>
+        <td th:text="${u.nickname}">nick</td>
+        <td th:text="${u.role}" th:classappend="${u.role.name()=='ADMIN'} ? 'role-admin' : ''">USER</td>
+        <td th:utext="${u.approved}? '<span class=&quot;ok&quot;>승인</span>' : '<span class=&quot;no&quot;>대기</span>'">승인</td>
+        <td th:text="${u.answerTrue}">0</td>
+        <td th:text="${u.answerFalse}">0</td>
+        <td>
+            <form th:if="${!u.approved}" th:action="@{/admin/approve}" method="post">
+                <input type="hidden" name="email" th:value="${u.email}">
+                <button class="btn-primary" type="submit">승인</button>
+            </form>
+            <form th:action="@{/admin/nickname/update}" method="post" autocomplete="off">
+                <input type="hidden" name="email" th:value="${u.email}">
+                <input type="text" name="nickname" placeholder="새 닉네임" required minlength="1" maxlength="50">
+                <button type="submit">닉네임</button>
+            </form>
+            <form th:action="@{/admin/resetPw}" method="post" autocomplete="off">
+                <input type="hidden" name="email" th:value="${u.email}">
+                <input type="password" name="newPw" placeholder="새 비번" required minlength="3">
+                <button type="submit">비번</button>
+            </form>
+            <form th:if="${u.role.name()!='ADMIN'}" th:action="@{/admin/user/delete}" method="post"
+                  onsubmit="return confirm('정말 삭제할까요?');">
+                <input type="hidden" name="email" th:value="${u.email}">
+                <button type="submit">삭제</button>
+            </form>
+        </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(list)}">
+        <td colspan="7">사용자가 없습니다.</td>
+    </tr>
+</table>
+</body>
+</html>

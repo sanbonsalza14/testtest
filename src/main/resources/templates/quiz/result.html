@@ -1,43 +1,96 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>퀴즈 결과</title>
+    <meta charset="UTF-8"><title>OX 퀴즈 결과</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
     <style>
-        body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:32px}
-        .card{border:1px solid #ddd;border-radius:12px;padding:20px;max-width:520px}
-        .n{font-size:28px;font-weight:700}
-        .muted{color:#777}
-        .row{margin:8px 0}
-        .btn{display:inline-flex;align-items:center;justify-content:center;min-width:140px;
-             height:40px;padding:0 16px;border-radius:8px;border:1px solid #ddd;
-             background:#111;color:#fff;text-decoration:none}
-        .btn--ghost{background:#fff;color:#111}
-        a{color:#5145ff;text-decoration:none} a:hover{text-decoration:underline}
+        .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:560px}
+        .card{border:1px solid #ddd;border-radius:10px;padding:16px;text-align:center;background:#fafafa}
+        .num{font-size:28px;font-weight:700}
+        .correct{color:blue}
+        .wrong{color:red}
+        .actions{margin-top:20px;display:flex;gap:8px}
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-width:120px;height:40px;padding:0 16px;
+             border-radius:8px;border:1px solid #ddd;background:#fff;color:#111;text-decoration:none;font-size:14px}
+        .btn--primary{background:#111;color:#fff;border-color:#111}
+        table{border-collapse:collapse;width:100%;max-width:880px;margin-top:24px}
+        th,td{border:1px solid #e5e5e5;padding:10px 12px;text-align:center}
+        th{background:#fafafa}
+        .nick{text-align:left}
+        .medal{font-size:20px}
     </style>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+
 </head>
 <body>
-<h1>내 퀴즈 결과</h1>
-<p class="muted" th:text="'사용자: ' + ${email}"></p>
-<p class="muted" th:text="'이번 라운드 진행: ' + ${played} + ' / ' + ${max}"></p>
+<h1>OX 퀴즈 결과</h1>
 
-<!-- ✅ 이번 라운드 기준 -->
-<div class="card">
-    <div class="row">맞춘 개수(이번 라운드): <span class="n" th:text="${rCorrect}">0</span></div>
-    <div class="row">틀린 개수(이번 라운드): <span class="n" th:text="${rWrong}">0</span></div>
-    <hr>
-    <div class="row">총 푼 문제(이번 라운드): <span class="n" th:text="${rTotal}">0</span></div>
+<p><b>플레이어:</b> <span th:text="${email}">-</span></p>
+<p><b>이번 라운드:</b> <span th:text="${played}">0</span> / <span th:text="${max}">20</span></p>
+
+<div class="grid">
+    <div class="card">
+        <div>이번 라운드 정답</div>
+        <div class="num correct" th:text="${rCorrect}">0</div>
+    </div>
+    <div class="card">
+        <div>이번 라운드 오답</div>
+        <div class="num wrong" th:text="${rWrong}">0</div>
+    </div>
+    <div class="card">
+        <div>이번 라운드 합계</div>
+        <div class="num" th:text="${rTotal}">0</div>
+    </div>
 </div>
 
-<!-- (선택) 누적 정보: 필요 없으면 이 블록 삭제해도 됨 -->
-<p class="muted" style="margin-top:10px">
-    누적 통계 — 맞춤:[[${all.correct}]], 틀림:[[${all.wrong}]], 총합:[[${all.total}]]
-</p>
+<h3 style="margin-top:20px">누적 통계</h3>
+<div class="grid">
+    <div class="card">
+        <div>누적 정답</div>
+        <div class="num correct" th:text="${all.correct}">0</div>
+    </div>
+    <div class="card">
+        <div>누적 오답</div>
+        <div class="num wrong" th:text="${all.wrong}">0</div>
+    </div>
+    <div class="card">
+        <div>누적 풀이</div>
+        <div class="num" th:text="${all.total}">0</div>
+    </div>
+</div>
 
-<p style="margin-top:16px">
-    <a th:href="@{/quiz/reset}" class="btn">다시 20문제 시작</a>
-    <a th:href="@{/quiz}" class="btn btn--ghost" style="margin-left:8px">목록으로</a>
-    <a th:href="@{/}" class="btn btn--ghost" style="margin-left:8px">홈으로</a>
-</p>
+<div class="actions">
+    <a th:href="@{/quiz/reset}" class="btn btn--primary">새 라운드 시작</a>
+    <a th:href="@{/quiz}" class="btn">CRUD 화면</a>
+    <a th:href="@{/}" class="btn">홈</a>
+</div>
+
+<!-- ✅ 상위 10 랭킹 (승인 사용자 기준) -->
+<h2 style="margin-top:36px">상위 랭킹 TOP 10</h2>
+<table>
+    <tr>
+        <th>순위</th><th>닉네임</th><th>정답</th><th>오답</th><th>총 풀이</th><th>정확도</th>
+    </tr>
+    <tr th:each="u, stat : ${rankTop}">
+        <td>
+      <span th:switch="${stat.count}">
+        <span th:case="1" class="medal">🥇</span>
+        <span th:case="2" class="medal">🥈</span>
+        <span th:case="3" class="medal">🥉</span>
+        <span th:case="*" th:text="${stat.count}">4</span>
+      </span>
+        </td>
+        <td class="nick" th:text="${u.nickname}">닉</td>
+        <td th:text="${u.answerTrue}">0</td>
+        <td th:text="${u.answerFalse}">0</td>
+        <td th:text="${u.answerTrue + u.answerFalse}">0</td>
+        <td th:text="${#numbers.formatDecimal((u.answerTrue==0 && u.answerFalse==0) ? 0.0 : (100.0 * u.answerTrue / (u.answerTrue + u.answerFalse)), 1, 1)} + '%'">0%</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(rankTop)}">
+        <td colspan="6">아직 랭킹 데이터가 없습니다.</td>
+    </tr>
+</table>
+
+<p style="margin-top:8px"><a th:href="@{/rank}">전체 랭킹 보러가기</a></p>
 </body>
 </html>

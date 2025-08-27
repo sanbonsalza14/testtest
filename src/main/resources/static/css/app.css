@@ -1,0 +1,15 @@
+/* 모든 페이지 공통 레이아웃: 가로 중앙 정렬 + 적당한 폭 */
+html, body { height: 100%; }
+
+body {
+  max-width: 960px !important;   /* 필요시 1080/1200 등으로 조정 */
+  margin: 32px auto !important;  /* 위아래 32px, 좌우 auto로 중앙 */
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+table { width: 100%; border-collapse: collapse; }
+
+@media (max-width: 480px) {
+  body { margin: 20px auto !important; padding: 0 12px !important; }
+}
